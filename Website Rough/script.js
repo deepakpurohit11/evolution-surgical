@@ -48,7 +48,7 @@ faqItems.forEach(item => {
 
 // FORM JAVASCRIPT
 
-const scriptURL = "https://script.google.com/macros/s/AKfycbwQKy9FSssFKP68C5ClcgfEl4JpleHoAggAUi1tx2ji5obas0w13jcjdizyvNJ_r5L-/exec";
+const scriptURL = "https://script.google.com/macros/s/AKfycbyoud1nG0y2NTxeJ264rFeGA8IBSvyFMhiuOOIChObgBaxryIhSRT6JIt_-k4yF9dPN/exec";
 
 const form = document.getElementById("enquiry-form");
 
@@ -77,6 +77,7 @@ form.addEventListener("submit", e => {
       document.getElementById("form-message").innerText =
       "Something went wrong. Please try again.";
   });
+
 
 
 
