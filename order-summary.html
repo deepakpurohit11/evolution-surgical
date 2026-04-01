@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Summary | Evolution Surgical</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a href="https://wa.me/918700828927" class="whatsapp-float" target="_blank">
+  <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
+</a>
+
+<div id="header-container"></div>
+
+<section class="order-summary-section">
+  <div class="order-summary-wrapper">
+
+    <div class="order-steps">
+      <div class="step done">✓ Cart</div>
+      <div class="step-line done"></div>
+      <div class="step active">📋 Order Summary</div>
+      <div class="step-line"></div>
+      <div class="step">💳 Payment</div>
+    </div>
+
+    <div class="order-summary-grid">
+
+      <div class="order-left">
+        <div class="order-card">
+          <h3 class="order-card-title">Items in Your Order</h3>
+          <div id="order-items-list"></div>
+        </div>
+
+        <div class="order-card">
+          <h3 class="order-card-title">Delivery Address</h3>
+          <div class="address-form">
+            <div class="address-row">
+              <input type="text" id="addr-name"    placeholder="Full Name *">
+              <input type="tel"  id="addr-phone"   placeholder="Mobile Number *">
+            </div>
+            <input type="text" id="addr-line1" placeholder="House / Flat No., Building, Street *">
+            <input type="text" id="addr-line2" placeholder="Area, Colony, Landmark (optional)">
+            <div class="address-row">
+              <input type="text" id="addr-city"    placeholder="City *">
+              <input type="text" id="addr-state"   placeholder="State *">
+            </div>
+            <div class="address-row">
+              <input type="text" id="addr-pincode" placeholder="Pincode *" maxlength="6">
+              <select id="addr-country"><option value="India">India</option></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="order-right">
+        <div class="order-price-card">
+          <h3 class="order-card-title">Price Details</h3>
+          <div class="price-row">
+            <span id="price-items-label">Price (0 items)</span>
+            <span id="price-subtotal">₹0</span>
+          </div>
+          <div class="price-row">
+            <span>Delivery Charges</span>
+            <span class="free-tag">FREE</span>
+          </div>
+          <div class="price-row discount-row" id="savings-row" style="display:none">
+            <span>Total Savings</span>
+            <span id="price-savings" class="savings-amt">−₹0</span>
+          </div>
+          <div class="price-divider"></div>
+          <div class="price-row total-row">
+            <span>Total Amount</span>
+            <span id="price-total">₹0</span>
+          </div>
+          <div class="savings-note" id="savings-note"></div>
+          <button class="place-order-btn" id="place-order-btn">Place Order &amp; Pay</button>
+          <p class="safe-note">🔒 Safe and Secure Payments</p>
+          <p class="safe-note">Easy Returns. 100% Authentic Products.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="addr-error-toast" id="addr-error-toast"></div>
+
+<!-- Firebase compat SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="firebase-config.js"></script>
+<script src="auth.js"></script>
+<script src="cart.js"></script>
+<script src="script.js"></script>
+<script src="loader.js"></script>
+<script src="header-auth.js"></script>
+
+<script>
+  // Guard: must be logged in
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (!user) {
+      window.location.href = "cart.html";
+    } else {
+      renderOrderSummary();
+    }
+  });
+
+  function renderOrderSummary() {
+    var items = JSON.parse(localStorage.getItem("es_cart") || "[]");
+    if (items.length === 0) { window.location.href = "cart.html"; return; }
+
+    var list = document.getElementById("order-items-list");
+    list.innerHTML = items.map(function(item) {
+      return '<div class="order-item">' +
+        '<img src="' + item.img + '" alt="' + item.name + '" class="order-item-img">' +
+        '<div class="order-item-info">' +
+          '<p class="order-item-name">' + item.name + '</p>' +
+          '<p class="order-item-meta">Qty: ' + item.qty + '</p>' +
+          (item.discount ? '<p class="order-item-disc">' + item.discount + ' off</p>' : '') +
+        '</div>' +
+        '<div class="order-item-price">' +
+          '<span>₹' + (item.price * item.qty) + '</span>' +
+          (item.oldPrice ? '<span class="order-item-old">₹' + (item.oldPrice * item.qty) + '</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join("");
+
+    var subtotal  = items.reduce(function(s,i){ return s + i.price * i.qty; }, 0);
+    var origTotal = items.reduce(function(s,i){ return s + (i.oldPrice || i.price) * i.qty; }, 0);
+    var savings   = origTotal - subtotal;
+    var count     = items.reduce(function(s,i){ return s + i.qty; }, 0);
+
+    document.getElementById("price-items-label").textContent = "Price (" + count + " item" + (count > 1 ? "s" : "") + ")";
+    document.getElementById("price-subtotal").textContent    = "₹" + subtotal;
+    document.getElementById("price-total").textContent       = "₹" + subtotal;
+    document.getElementById("price-savings").textContent     = "−₹" + savings;
+
+    if (savings > 0) {
+      document.getElementById("savings-note").textContent     = "🎉 You're saving ₹" + savings + " on this order!";
+      document.getElementById("savings-row").style.display    = "flex";
+    }
+  }
+
+  document.getElementById("place-order-btn").addEventListener("click", function() {
+    var fields = [
+      { id: "addr-name",    label: "Full Name" },
+      { id: "addr-phone",   label: "Mobile Number" },
+      { id: "addr-line1",   label: "Address Line 1" },
+      { id: "addr-city",    label: "City" },
+      { id: "addr-state",   label: "State" },
+      { id: "addr-pincode", label: "Pincode" },
+    ];
+
+    for (var i = 0; i < fields.length; i++) {
+      var val = document.getElementById(fields[i].id).value.trim();
+      if (!val) { showAddrToast("Please enter your " + fields[i].label); return; }
+    }
+
+    var pincode = document.getElementById("addr-pincode").value.trim();
+    if (!/^\d{6}$/.test(pincode)) { showAddrToast("Please enter a valid 6-digit pincode"); return; }
+
+    var phone = document.getElementById("addr-phone").value.trim();
+    if (!/^\d{10}$/.test(phone)) { showAddrToast("Please enter a valid 10-digit mobile number"); return; }
+
+    var user  = firebase.auth().currentUser;
+    var items = JSON.parse(localStorage.getItem("es_cart") || "[]");
+    var total = items.reduce(function(s,i){ return s + i.price * i.qty; }, 0);
+
+    var address = {
+      name:    document.getElementById("addr-name").value.trim(),
+      phone:   document.getElementById("addr-phone").value.trim(),
+      line1:   document.getElementById("addr-line1").value.trim(),
+      line2:   document.getElementById("addr-line2").value.trim(),
+      city:    document.getElementById("addr-city").value.trim(),
+      state:   document.getElementById("addr-state").value.trim(),
+      pincode: document.getElementById("addr-pincode").value.trim(),
+      country: "India"
+    };
+
+    var orderId = "ORD-" + Date.now();
+
+    firebase.firestore().collection("orders").doc(orderId).set({
+      orderId:   orderId,
+      userId:    user.uid,
+      userEmail: user.email,
+      items:     items,
+      address:   address,
+      total:     total,
+      status:    "pending_payment",
+      createdAt: new Date().toISOString()
+    }).then(function() {
+      localStorage.setItem("es_pending_order",  orderId);
+      localStorage.setItem("es_pending_amount", total);
+
+      // ── CLIENT PLUGS IN PAYMENT GATEWAY HERE ──
+      // Order is saved in Firestore as "pending_payment"
+      // orderId = localStorage.getItem("es_pending_order")
+      // amount  = localStorage.getItem("es_pending_amount")
+      alert("✅ Order " + orderId + " saved!\nTotal: ₹" + total + "\n\n[Payment gateway will be integrated here]");
+
+    }).catch(function(err) {
+      console.error("Order error:", err);
+      showAddrToast("Something went wrong. Please try again.");
+    });
+  });
+
+  function showAddrToast(msg) {
+    var toast = document.getElementById("addr-error-toast");
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(function() { toast.classList.remove("show"); }, 3000);
+  }
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="firebase-config.js"></script>
+<script src="auth.js"></script>
+<script src="header-auth.js"></script>
+
+<script src="script.js"></script>
+<script src="loader.js"></script>
+</body>
+</html>

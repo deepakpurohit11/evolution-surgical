@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Cart | Evolution Surgical</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a href="https://wa.me/918700828927" class="whatsapp-float" target="_blank">
+  <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp">
+</a>
+
+<div id="header-container"></div>
+
+<section class="cart-section">
+  <div class="cart-wrapper" id="cart-wrapper">
+
+    <div class="cart-items-col">
+      <h2 class="cart-title">Your Cart <span id="cart-count-label"></span></h2>
+      <div id="cart-items-list"></div>
+    </div>
+
+    <div class="cart-summary-col">
+      <div class="cart-summary-box">
+        <h3>Order Summary</h3>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="summary-subtotal">₹0</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping</span>
+          <span class="free-shipping">FREE</span>
+        </div>
+        <div class="summary-row summary-row--total">
+          <span>Total</span>
+          <span id="summary-total">₹0</span>
+        </div>
+        <button class="checkout-btn" id="checkout-btn">Proceed to Checkout</button>
+        <a href="index.html#explore-collections" class="continue-shopping">← Continue Shopping</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="empty-cart" id="empty-cart" style="display:none">
+    <div class="empty-cart-icon">🛒</div>
+    <h3>Your cart is empty</h3>
+    <p>Looks like you haven't added anything yet.</p>
+    <a href="index.html#explore-collections" class="primary-btn">Explore Collections</a>
+  </div>
+</section>
+
+<div class="order-success-banner" id="order-success-banner" style="display:none">
+  <span>✅ You're logged in! Redirecting to order summary...</span>
+</div>
+
+<!-- Firebase compat SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="firebase-config.js"></script>
+<script src="auth.js"></script>
+<script src="cart.js"></script>
+<script src="script.js"></script>
+<script src="loader.js"></script>
+<script src="header-auth.js"></script>
+
+<script>
+  function renderCart() {
+    var items = JSON.parse(localStorage.getItem("es_cart") || "[]");
+    var list        = document.getElementById("cart-items-list");
+    var empty       = document.getElementById("empty-cart");
+    var wrapper     = document.getElementById("cart-wrapper");
+    var countLabel  = document.getElementById("cart-count-label");
+
+    if (items.length === 0) {
+      wrapper.style.display = "none";
+      empty.style.display   = "flex";
+      return;
+    }
+
+    wrapper.style.display = "grid";
+    empty.style.display   = "none";
+    countLabel.textContent = "(" + items.reduce(function(s,i){ return s+i.qty; }, 0) + " items)";
+
+    list.innerHTML = items.map(function(item) {
+      return '<div class="cart-item" data-id="' + item.id + '">' +
+        '<img src="' + item.img + '" alt="' + item.name + '" class="cart-item-img">' +
+        '<div class="cart-item-details">' +
+          '<a href="' + item.link + '" class="cart-item-name">' + item.name + '</a>' +
+          '<div class="cart-item-pricing">' +
+            '<span class="cart-item-price">₹' + item.price + '</span>' +
+            (item.oldPrice ? '<span class="cart-item-old">₹' + item.oldPrice + '</span>' : '') +
+            (item.discount ? '<span class="cart-item-disc">' + item.discount + '</span>' : '') +
+          '</div>' +
+          '<div class="cart-item-qty">' +
+            '<button class="qty-btn" onclick="changeQty(\'' + item.id + '\', -1)">−</button>' +
+            '<span class="qty-num">' + item.qty + '</span>' +
+            '<button class="qty-btn" onclick="changeQty(\'' + item.id + '\', 1)">+</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="cart-item-right">' +
+          '<span class="cart-item-subtotal">₹' + (item.price * item.qty) + '</span>' +
+          '<button class="remove-item-btn" onclick="removeItem(\'' + item.id + '\')">🗑 Remove</button>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+
+    var total = items.reduce(function(s,i){ return s + i.price * i.qty; }, 0);
+    document.getElementById("summary-subtotal").textContent = "₹" + total;
+    document.getElementById("summary-total").textContent    = "₹" + total;
+    if (window.Cart) window.Cart.updateBadge();
+  }
+
+  window.changeQty = function(id, delta) {
+    var items = JSON.parse(localStorage.getItem("es_cart") || "[]");
+    var item  = items.find(function(i){ return i.id === id; });
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) { window.removeItem(id); return; }
+    localStorage.setItem("es_cart", JSON.stringify(items));
+    renderCart();
+  };
+
+  window.removeItem = function(id) {
+    var items = JSON.parse(localStorage.getItem("es_cart") || "[]").filter(function(i){ return i.id !== id; });
+    localStorage.setItem("es_cart", JSON.stringify(items));
+    renderCart();
+  };
+
+  document.addEventListener("DOMContentLoaded", function() {
+    renderCart();
+
+    document.getElementById("checkout-btn").addEventListener("click", function() {
+      var user = firebase.auth().currentUser;
+      if (user) {
+        window.location.href = "order-summary.html";
+      } else {
+        openAuthModal(function() {
+          var banner = document.getElementById("order-success-banner");
+          banner.style.display = "flex";
+          setTimeout(function() { window.location.href = "order-summary.html"; }, 1800);
+        });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

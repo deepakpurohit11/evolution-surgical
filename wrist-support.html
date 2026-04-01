@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wrist Hand Support</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="product.css">
+</head>
+
+<body>
+<div id="header-container"></div>  
+
+<!-- <header class="header">
+<div class="logo">
+<a href="index.html">
+<img src="images/company_logo.jpeg">
+</a>
+</div>
+</header> -->
+
+
+<section class="product-page">
+
+<div class="product-container">
+
+<!-- LEFT IMAGE -->
+<div class="product-image">
+
+<img src="images/splint_1.jpg" alt="Wrist Support">
+
+</div>
+
+
+<!-- CENTER DETAILS -->
+<div class="product-details">
+
+<h1>
+Wrist Hand Support Static Cockup Splint for Stroke,
+Paralysis, Arthritic Diseases, and Fractures
+</h1>
+
+<div class="rating">
+★★★★★ <span>(309 Reviews)</span>
+</div>
+
+<p class="bought">
+100+ bought in past month
+</p>
+
+<div class="price">
+<span class="discount">-75%</span>
+<span class="new-price">₹499</span>
+<span class="old-price">₹1,999</span>
+</div>
+
+<p class="tax">Inclusive of all taxes</p>
+
+<div class="info">
+
+<p><strong>Brand:</strong> Helrdx</p>
+<p><strong>Size:</strong> M</p>
+<p><strong>Specific Uses:</strong> Fracture, Paralysis, Stroke</p>
+<p><strong>Use for:</strong> Hands</p>
+<p><strong>Age Range:</strong> Adult and Kids</p>
+
+</div>
+
+</div>
+
+
+
+<!-- RIGHT SIDE PURCHASE -->
+<div class="buy-box">
+
+<h2>₹499</h2>
+
+<p class="stock">In stock</p>
+
+<button class="cart-btn"
+  data-id="wrist-hand-support"
+  data-name="Wrist Hand Support"
+  data-price="499"
+  data-old-price="1999"
+  data-discount="75% off"
+  data-img="images/splint_1.jpg"
+  data-link="wrist-support.html">
+  Add to Cart
+</button>
+
+<button class="buy-btn" onclick="
+  const btn = document.querySelector('.cart-btn[data-id]');
+  btn.click();
+  setTimeout(() => {
+    window.location.href = 'cart.html';
+  }, 100);
+">
+Buy Now
+</button>
+
+<a href="https://www.amazon.in/Hand-Orthosis-Full-Cockup-Paralysis/dp/B0BCC71C98/ref=ast_sto_dp_puis?th=1" target="_blank" class="amazon-btn">
+See on Amazon
+</a>
+
+</div>
+
+</div>
+
+
+
+<!-- DESCRIPTION -->
+<div class="product-description">
+
+<h2>About this item</h2>
+
+<ul>
+
+<li>
+A static splint is a simple design with no moving parts.
+</li>
+
+<li>
+Its primary purposes include providing support,
+protection, or correction.
+</li>
+
+<li>
+Thick layer foam padding,
+No microorganism growth even after continuous use,
+uniquely designed thumb abductor.
+</li>
+
+<li>
+Static splints are often used to maintain
+normal hand arches.
+</li>
+
+<li>
+These splints are particularly helpful
+for conditions where immobilization is necessary.
+</li>
+
+<li>
+For instance, a resting hand splint immobilizes
+the fingers and wrist ensuring stability.
+</li>
+
+</ul>
+
+</div>
+
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="firebase-config.js"></script>
+<script src="auth.js"></script>
+<script src="header-auth.js"></script>
+
+<script src="script.js"></script>
+<script src="loader.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>
